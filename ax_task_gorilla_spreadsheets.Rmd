@@ -1,0 +1,122 @@
+---
+title: "gorilla_spreadsheets_ax"
+author: "Adam A. Bramlett"
+date: "2024-03-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+```
+
+```{r}
+tone_base<-c("a","u")
+aff_base<-c("ao")
+
+tone_init<-c("b","l")
+aff_init<-c("zh","ch")
+
+feature_1<-c("tone")
+contrast_1<-c("2","4")
+
+feature_2<-c("affricates")
+contrast_2<-c("aveolar","retroflexive")
+
+contrast_2.1<-c("j","zh")
+contrast_2.2<-c("q","ch")
+```
+
+```{r}
+tone<-expand.grid(tone_base,tone_init,contrast_1,contrast_1)
+
+tone<-tone%>%
+  mutate(word_1=paste(Var2,Var1,"_",Var3,sep=""),
+         word_2=paste(Var2,Var1,"_",Var4,sep=""),
+         contrast_word_1=Var3,
+         contrast_word_2=Var4,
+         type=feature_1[1],
+         match = if_else(contrast_word_1 == contrast_word_2,1,0))%>%
+  select(word_1,word_2,contrast_word_1,contrast_word_2,match,type)
+
+
+aff<-expand.grid(aff_base,aff_init,contrast_2,contrast_2,contrast_1)
+
+aff<-aff%>%
+  mutate(initial_1 = case_when(Var3 == "aveolar"&Var2 == "ch"~"qi",
+                               Var3 == "aveolar"&Var2 == "zh"~"ji",
+                               Var3 != "aveolar"&Var2 == "ch"~"ch",
+                               Var3 != "aveolar"&Var2 == "zh"~"zh"),
+         initial_2 = case_when(Var4 == "aveolar"&Var2 == "ch"~"qi",
+                               Var4 == "aveolar"&Var2 == "zh"~"ji",
+                               Var4 != "aveolar"&Var2 == "ch"~"ch",
+                               Var4 != "aveolar"&Var2 == "zh"~"zh"),
+         word_1=paste(initial_1,Var1,"_",Var5,sep=""),
+         word_2=paste(initial_2,Var1,"_",Var5,sep=""),
+         contrast_word_1=Var3,
+         contrast_word_2=Var4,
+         type=feature_2[1],
+         match = if_else(contrast_word_1 == contrast_word_2,1,0))%>%
+  select(word_1,word_2,contrast_word_1,contrast_word_2,match,type)
+
+
+aff_agg<-aff%>%group_by(match)%>%count()
+tone_agg<-tone%>%group_by(match)%>%count()
+View(aff_agg)
+View(tone_agg)
+```
+
+```{r}
+filler_base<-c("iao","ang")
+filler_init<-c("m","t")
+filler_tone<-c("1")
+
+filler<-expand.grid(filler_init,filler_init,filler_base,filler_tone,filler_tone)
+  
+filler_1<-filler%>%
+  mutate(word_1=paste(Var1,Var3,"_",Var4,sep=""),
+         word_2=paste(Var2,Var3,"_",Var5,sep=""),
+         match=if_else(word_1==word_2,1,0))
+  
+filler_base<-c("ei","ai")
+filler_init<-c("g","h")
+filler_tone<-c("3")
+
+filler<-expand.grid(filler_init,filler_init,filler_base,filler_tone,filler_tone)
+  
+filler_2<-filler%>%
+  mutate(word_1=paste(Var1,Var3,"_",Var4,sep=""),
+         word_2=paste(Var2,Var3,"_",Var5,sep=""),
+         match=if_else(word_1==word_2,1,0))
+
+filler_set<-rbind(filler_1,filler_2)%>%
+  select(word_1,word_2,match)%>%
+  mutate(type="filler")
+```
+
+```{r}
+all_ax_combos<-bind_rows(aff,tone,filler_set)
+all_ax_combos<-bind_rows(all_ax_combos,all_ax_combos)
+
+all_ax_combos <- all_ax_combos %>%
+  mutate(speaker = if_else(nrow(all_ax_combos) / 2 > row_number(), 1, 0))
+
+all_ax_combos<-all_ax_combos%>%
+  mutate(speaker_1_word_1=paste("FV1_",word_1,"_.mp3",sep=""),
+         speaker_1_word_2=paste("FV1_",word_2,"_.mp3",sep=""),
+         speaker_2_word_1=paste("MV1_",word_1,"_.mp3",sep=""),
+         speaker_2_word_2=paste("MV1_",word_2,"_.mp3",sep=""))
+
+
+folder_path <- "spread_sheets"
+# Check if the folder exists
+if (!dir.exists(folder_path)) {
+  dir.create(folder_path)
+}
+
+file_path <- file.path(folder_path, "all_ax_combos.csv")
+# Save the DataFrame as a CSV file
+write.csv(all_ax_combos, file_path, row.names = FALSE)
+
+```
+
+

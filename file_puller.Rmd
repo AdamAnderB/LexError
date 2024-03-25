@@ -1,0 +1,85 @@
+---
+title: "file_puller"
+author: "Adam A. Bramlett"
+date: "2024-03-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+```
+
+```{r}
+ax_task_words<-read.csv("spread_sheets/all_ax_combos.csv")
+
+folder_path <- "../sound_files"
+# Check if the folder exists
+if (!dir.exists(folder_path)) {
+  dir.create(folder_path)
+}
+
+folder_path <- "../sound_files/LexError_AX"
+# Check if the folder exists
+if (!dir.exists(folder_path)) {
+  dir.create(folder_path)
+}
+
+#this file structure assumes that all of the data per speakers is stored by speaker
+speakers <- list.files("../../all_Mandarin_speakers/speakers", full.names=TRUE)
+speaker1_dir <- speakers[1]  # Assuming this is the directory for FV1
+speaker4_dir <- speakers[2]  # Assuming this is the directory for MV1
+
+# Function to copy files for a given row
+copy_files_for_row <- function(row, speaker1_dir, speaker4_dir, folder_path) {
+  file.copy(from = file.path(speaker1_dir, row[["speaker_1_word_1"]]),
+            to = folder_path)
+  file.copy(from = file.path(speaker1_dir, row[["speaker_1_word_2"]]),
+            to = folder_path)
+  file.copy(from = file.path(speaker4_dir, row[["speaker_2_word_1"]]),
+            to = folder_path)
+  file.copy(from = file.path(speaker4_dir, row[["speaker_2_word_2"]]),
+            to = folder_path)
+}
+
+# Iterate over each row of ax_task_words and copy the files
+for (i in 1:nrow(ax_task_words)) {
+  copy_files_for_row(ax_task_words[i, ], speaker1_dir, speaker4_dir, folder_path)
+}
+```
+
+```{r}
+# Function to check for missing files after the copy operation
+report_missing_files <- function(df, folder_path) {
+  # Initialize a vector to store the paths of missing files
+  missing_files <- character()
+
+  # Iterate over the dataframe to check each file in the target directory
+  for (i in 1:nrow(df)) {
+    row <- df[i, ]
+    file_paths <- c(file.path(folder_path, row[["speaker_1_word_1"]]),
+                    file.path(folder_path, row[["speaker_1_word_2"]]),
+                    file.path(folder_path, row[["speaker_2_word_1"]]),
+                    file.path(folder_path, row[["speaker_2_word_2"]]))
+                    
+    # Check for missing files and add them to the vector
+    for (file_path in file_paths) {
+      if (!file.exists(file_path)) {
+        missing_files <- c(missing_files, file_path)
+      }
+    }
+  }
+  
+  # Report the missing files
+  if (length(missing_files) > 0) {
+    cat("Missing files:\n", paste(missing_files, collapse = "\n"), "\n")
+  } else {
+    cat("No missing files. All files were copied successfully.\n")
+  }
+}
+
+# Call the function to report missing files
+report_missing_files(ax_task_words, folder_path)
+```
+
+

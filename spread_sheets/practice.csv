@@ -1,0 +1,8 @@
+"randomise_trials","display","word_1","word_2","contrast_word_1","contrast_word_2","match","type","speaker","sound1","sound2"
+1,"Instructions",NA,NA,NA,NA,NA,NA,NA,NA,NA
+2,"Block","zhao_2","jiao_2","retroflexive","aveolar",0,"affricates",1,"FV1_zhao_2_.mp3","FV2_jiao_2_.mp3"
+2,"Block","jiao_2","jiao_2","aveolar","aveolar",1,"affricates",1,"FV1_jiao_2_.mp3","FV2_jiao_2_.mp3"
+2,"Block","tiao_1","miao_1",NA,NA,0,"filler",1,"FV1_tiao_1_.mp3","FV2_miao_1_.mp3"
+2,"Block","miao_1","miao_1",NA,NA,1,"filler",1,"FV1_miao_1_.mp3","FV2_miao_1_.mp3"
+2,"Block","ba_4","ba_2","4","2",0,"tone",1,"FV1_ba_4_.mp3","FV2_ba_2_.mp3"
+2,"Block","ba_2","ba_2","2","2",1,"tone",1,"FV1_ba_2_.mp3","FV2_ba_2_.mp3"
