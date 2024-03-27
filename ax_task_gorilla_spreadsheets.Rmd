@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(dplyr)
+library(tidyr)
 ```
 
 ```{r}
@@ -102,10 +103,18 @@ all_ax_combos <- all_ax_combos %>%
 
 all_ax_combos<-all_ax_combos%>%
   mutate(speaker_1_word_1=paste("FV1_",word_1,"_.mp3",sep=""),
-         speaker_1_word_2=paste("FV1_",word_2,"_.mp3",sep=""),
-         speaker_2_word_1=paste("MV1_",word_1,"_.mp3",sep=""),
-         speaker_2_word_2=paste("MV1_",word_2,"_.mp3",sep=""))
+         speaker_1_word_2=paste("FV2_",word_2,"_.mp3",sep=""),
+         speaker_2_word_1=paste("FV1_",word_1,"_.mp3",sep=""),
+         speaker_2_word_2=paste("FV2_",word_2,"_.mp3",sep=""),
+         sound1=case_when(speaker==1~speaker_1_word_1,
+                          speaker==0~speaker_2_word_1),
+         sound2=case_when(speaker==1~speaker_1_word_2,
+                          speaker==0~speaker_2_word_2))
+```
 
+```{r}
+#this is used for pulling the files from the mandarin files to file_puller script.
+#then will go back to building the  spreadsheet in the next block.
 
 folder_path <- "spread_sheets"
 # Check if the folder exists
@@ -116,7 +125,56 @@ if (!dir.exists(folder_path)) {
 file_path <- file.path(folder_path, "all_ax_combos.csv")
 # Save the DataFrame as a CSV file
 write.csv(all_ax_combos, file_path, row.names = FALSE)
-
 ```
+
+```{r}
+#gorilla spread sheets
+gorilla_ax<-all_ax_combos%>%select(!c(speaker_1_word_1:speaker_2_word_2))
+gorilla_ax$display<-"Block"
+gorilla_ax$randomise_trials <- 2
+
+
+df_grouped <- gorilla_ax %>%
+  unite("grouping_var", match, type, speaker, remove = FALSE) %>%
+  group_by(grouping_var) %>%
+  mutate(row_id = row_number()) %>%
+  ungroup()
+
+# Step 3: Assign each row in a group alternately to two different dataframes
+df_grouped <- df_grouped %>%
+  mutate(assignment = ifelse(row_id %% 2 == 0, "A", "B"))
+
+# Step 4: Split the dataframe
+df_A <- df_grouped %>% filter(assignment == "A") %>% select(-grouping_var, -row_id, -assignment)
+df_B <- df_grouped %>% filter(assignment == "B") %>% select(-grouping_var, -row_id, -assignment)
+
+df_practice <- gorilla_ax %>%
+  filter(type %in% c("filler", "tone", "affricates")) %>%
+  group_by(type,match) %>%
+  slice(1) %>%
+  ungroup()
+
+first_row <- data.frame(randomise_trials = 1, display = "Instructions")  
+middle_row <- data.frame(randomise_trials = 1, display = "Instructions2")
+break_row <- data.frame(randomise_trials = 1, display = "Break")
+
+practice<-bind_rows(first_row,df_practice)
+sp_1<- bind_rows(middle_row, df_A)
+sp_2 <- bind_rows(break_row,df_A)
+
+View(practice)
+View(sp_1)
+View(sp_2)
+
+
+folder_path <- "spread_sheets"
+file_path <- file.path(folder_path, "practice.csv")
+write.csv(practice, file_path, row.names = FALSE)
+file_path <- file.path(folder_path, "sp_1.csv")
+write.csv(sp_1, file_path, row.names = FALSE)
+file_path <- file.path(folder_path, "sp_2.csv")
+write.csv(sp_2, file_path, row.names = FALSE)
+```
+
 
 

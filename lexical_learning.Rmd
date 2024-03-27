@@ -1,0 +1,61 @@
+---
+title: "Gorilla_spreadsheets"
+author: "Adam A. Bramlett"
+date: "2024-03-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+```
+
+```{r}
+base<-c("ong","a","ang","ou")
+feature_1<-c("tone")
+feature_2<-c("affricates")
+contrast_1<-c("2","4")
+contrast_2<-c("aveolar","retroflexive")
+
+contrast_2.1<-c("j","zh")
+contrast_2.2<-c("q","ch")
+```
+
+```{r}
+#building tonal lexicon
+combination_1 <- expand.grid(contrast_1,base)
+combination_2 <- expand.grid(contrast_2,base)
+
+combination_1<-combination_1%>%
+  mutate(contrast=c(rep(contrast_2,each=2),rep(contrast_2,each=2)),
+         contrast_cue=c(rep(contrast_2.1,each=2),rep(contrast_2.2,each=2)))
+
+combination_2<-combination_2%>%
+  mutate(contrast=c(rep(contrast_1,each=2),rep(contrast_1,each=2)),
+         contrast_cue=c(rep(contrast_2.1,times=2),rep(contrast_2.2,times=2)))
+```
+
+
+```{r}
+base<-c("aroob","ojom","aliib","akim","araam","amal","odoom","arak")
+feature_1<-c("glottal")
+feature_2<-c("vowel_length")
+contrast_1<-c("h","7")
+contrast_2<-c("long","short")
+
+contrast_2.1<-c("","zh")
+contrast_2.2<-c("q","ch")
+```
+
+```{r}
+#building tonal lexicon
+combination_1 <- expand.grid(contrast_1,base)
+combination_2 <- expand.grid(contrast_2,base)
+
+combination_1<-combination_1%>%
+  mutate(contrast=c(rep(contrast_2,each=2),rep(contrast_2,each=2)),
+         contrast_cue=c(rep(contrast_2.1,each=2),rep(contrast_2.2,each=2)))
+
+combination_2<-combination_2%>%
+  mutate(contrast=c(rep(contrast_1,each=2),rep(contrast_1,each=2)),
+         contrast_cue=c(rep(contrast_2.1,times=2),rep(contrast_2.2,times=2)))
+```

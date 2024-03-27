@@ -1,17 +1,16 @@
 ---
-title: "file_puller"
+title: "file_puller_lexical_learning"
 author: "Adam A. Bramlett"
-date: "2024-03-25"
+date: "2024-03-27"
 output: html_document
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 ```
 
 ```{r}
-ax_task_words<-read.csv("spread_sheets/all_ax_combos.csv")
+lex_words<-read.csv("mandarin/sound_files_key.csv")
 
 folder_path <- "../sound_files"
 # Check if the folder exists
@@ -19,7 +18,7 @@ if (!dir.exists(folder_path)) {
   dir.create(folder_path)
 }
 
-folder_path <- "../sound_files/LexError_AX"
+folder_path <- "../sound_files/LexError_learning"
 # Check if the folder exists
 if (!dir.exists(folder_path)) {
   dir.create(folder_path)
@@ -28,25 +27,21 @@ if (!dir.exists(folder_path)) {
 #this file structure assumes that all of the data per speakers is stored by speaker
 speakers <- list.files("../../all_Mandarin_speakers/speakers", full.names=TRUE)
 speakers <- list.files("../../all_Mandarin_speakers/speakers", full.names=TRUE)
-speakers
+
 speaker1_dir <- speakers[1]  # Assuming this is the directory for FV1
 speaker4_dir <- speakers[2]  # Assuming this is the directory for FV2
 
 # Function to copy files for a given row
 copy_files_for_row <- function(row, speaker1_dir, speaker4_dir, folder_path) {
-  file.copy(from = file.path(speaker1_dir, row[["speaker_1_word_1"]]),
+  file.copy(from = file.path(speaker1_dir, row[["speaker_1"]]),
             to = folder_path)
-  file.copy(from = file.path(speaker1_dir, row[["speaker_1_word_2"]]),
-            to = folder_path)
-  file.copy(from = file.path(speaker4_dir, row[["speaker_2_word_1"]]),
-            to = folder_path)
-  file.copy(from = file.path(speaker4_dir, row[["speaker_2_word_2"]]),
+  file.copy(from = file.path(speaker4_dir, row[["speaker_2"]]),
             to = folder_path)
 }
 
 # Iterate over each row of ax_task_words and copy the files
-for (i in 1:nrow(ax_task_words)) {
-  copy_files_for_row(ax_task_words[i, ], speaker1_dir, speaker4_dir, folder_path)
+for (i in 1:nrow(lex_words)) {
+  copy_files_for_row(lex_words[i, ], speaker1_dir, speaker4_dir, folder_path)
 }
 ```
 
@@ -83,5 +78,6 @@ report_missing_files <- function(df, folder_path) {
 # Call the function to report missing files
 report_missing_files(ax_task_words, folder_path)
 ```
+
 
 
